@@ -14,11 +14,16 @@ namespace AzureStorageApp
                 .AddJsonFile("appsettings.json", false, true);
             IConfiguration config = builder.Build();
 
-            string? keyVaultName = config.GetValue<string>("StorageKey");
-            Console.WriteLine(keyVaultName);
-            var kvUri = "https://" + keyVaultName + ".vault.azure.net";
+            string keyVaultUrl = config.GetConnectionString("KeyVault") ?? string.Empty;
+            string keyVaultStorageName = config.GetValue<string>("StorageKey") ?? string.Empty;
+            Console.WriteLine(keyVaultUrl);
 
-            var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
+            var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
+            {
+                ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
+            });
+            var client = new SecretClient(new Uri(keyVaultUrl), creds);
+            var storageKey = client.GetSecret(keyVaultStorageName);
 
             // Get app setting value for storage key
             Console.WriteLine("Hello, World!");
