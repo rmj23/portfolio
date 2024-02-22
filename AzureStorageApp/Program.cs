@@ -1,7 +1,6 @@
-﻿using System;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace AzureStorageApp
 {
@@ -9,21 +8,17 @@ namespace AzureStorageApp
     {
         static void Main(string[] args)
         {
-            // Build app with app settings file
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false, true);
-            IConfiguration config = builder.Build();
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddSingleton<IKeyVaultService, KeyVaultService>();
+                })
+                .Build();
 
-            string keyVaultUrl = config.GetConnectionString("KeyVault") ?? string.Empty;
-            string keyVaultStorageName = config.GetValue<string>("StorageKey") ?? string.Empty;
-            Console.WriteLine(keyVaultUrl);
+            var _keyVaultService = host.Services.GetRequiredService<IKeyVaultService>();
+            var _config = host.Services.GetRequiredService<IConfiguration>();
 
-            var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
-            {
-                ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
-            });
-            var client = new SecretClient(new Uri(keyVaultUrl), creds);
-            var storageKey = client.GetSecret(keyVaultStorageName);
+            var storageKey = _keyVaultService.GetSecret(_config.GetValue<string>("StorageKey") ?? string.Empty);
 
             // Get app setting value for storage key
             Console.WriteLine("Hello, World!");
