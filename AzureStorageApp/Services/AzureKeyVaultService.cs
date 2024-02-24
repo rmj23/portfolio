@@ -6,7 +6,7 @@ using Ardalis.GuardClauses;
 /// <summary>
 /// Implementation of the KeyVaultService
 /// </summary>
-public class KeyVaultService : IKeyVaultService
+public class AzureKeyVaultService : IKeyVaultService
 {
     /// <summary>
     /// The secret client
@@ -14,17 +14,20 @@ public class KeyVaultService : IKeyVaultService
     private readonly SecretClient _client;
 
     /// <summary>
-    /// Constructor
+    /// Initializes a new instance of the KeyVaultService class. Client gets created once and reused.
     /// </summary>
     /// <param name="config">Configuration</param>
-    public KeyVaultService(IConfiguration config)
+    public AzureKeyVaultService(IConfiguration config)
     {
-        string keyVaultUrl = config.GetConnectionString("KeyVault");
+        string? keyVaultUrl = config.GetConnectionString("KeyVault");
+        string? managedIdentityClientId = config.GetValue<string>("ManagedIdentityClientId");
+
         Guard.Against.NullOrEmpty(keyVaultUrl, nameof(keyVaultUrl));
+        Guard.Against.NullOrEmpty(managedIdentityClientId, nameof(managedIdentityClientId));
 
         var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
         {
-            ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
+            ManagedIdentityClientId = managedIdentityClientId
         });
         
         _client = new SecretClient(new Uri(keyVaultUrl), creds);
@@ -35,11 +38,12 @@ public class KeyVaultService : IKeyVaultService
     /// </summary>
     /// <param name="secretName">The secret name</param>
     /// <returns>The secret's value. Empty string if noting found</returns>
-    public string GetSecret(string secretName)
+    public async Task<string> GetSecretAsync(string secretName)
     {
         try
         {
-            return _client.GetSecretAsync(secretName).Result.Value.Value ?? string.Empty;
+            var result = await _client.GetSecretAsync(secretName);
+            return result.Value.Value ?? string.Empty;
         }
         catch (Exception ex)
         {

@@ -8,5 +8,5 @@ public interface IKeyVaultService
     /// </summary>
     /// <param name="secretName">The Secret's name</param>
     /// <returns>The Secret value. Empty string if nothing found.</returns>
-    string GetSecret(string secretName);
+    Task<string> GetSecretAsync(string secretName);
 }
