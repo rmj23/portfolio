@@ -1,36 +1,33 @@
-﻿using System;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Azure.Storage.Blobs;
+using AzureStorageApp.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace AzureStorageApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async void Main(string[] args)
         {
-            // Build app with app settings file
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false, true);
-            IConfiguration config = builder.Build();
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddSingleton<IKeyVaultService, AzureKeyVaultService>();
+                })
+            .Build();
 
-            // Get Key Vault URL and storage key name from app settings
-            string keyVaultUrl = config.GetConnectionString("KeyVault") ?? string.Empty;
-            string keyVaultStorageName = config.GetValue<string>("StorageKey") ?? string.Empty;
-            Console.WriteLine(keyVaultUrl);
+            // Get the configuration and the key vault service
+            var _config = host.Services.GetRequiredService<IConfiguration>();
+            var _keyVaultService = host.Services.GetRequiredService<IKeyVaultService>();
 
-            // Get storage key from Key Vault
-            var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
-            {
-                ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
-            });
-            
-            var client = new SecretClient(new Uri(keyVaultUrl), creds);
-            var storageKey = client.GetSecret(keyVaultStorageName);
+            // Get the storage key from the key vault
+            var storageKey = await _keyVaultService.GetSecretAsync(_config.GetValue<string>("StorageKey") ?? string.Empty);
 
-            // Create a new BlobServiceClient
-            var blobServiceClient = new BlobServiceClient(storageKey.Value.Value);
+            // Create a new instance of the AzureStorageService
+            var _storageService = new AzureStorageService(storageKey, "ContainerA");
+
+            // Check if the file exists
+            bool fileExists = await _storageService.FileExistsAsync(storageKey);
 
             // Get app setting value for storage key
             Console.WriteLine("Hello, World!");
