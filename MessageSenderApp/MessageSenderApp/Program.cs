@@ -1,7 +1,10 @@
+using MessageSenderApp;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddSingleton(new QueueService("", "webapptest"));
 
 var app = builder.Build();
 
