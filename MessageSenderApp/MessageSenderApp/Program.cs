@@ -1,10 +1,20 @@
+using Azure.Identity;
 using MessageSenderApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-builder.Services.AddSingleton(new QueueService("", "webapptest"));
+
+var keyVaultUrl = builder.Configuration["KeyVaultUrl"] ?? string.Empty;
+var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
+{
+    ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
+});
+builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), creds);
+
+var queueServiceConnectionString = builder.Configuration["StorageConnectionString"] ?? string.Empty;
+builder.Services.AddSingleton(new QueueService(queueServiceConnectionString, "webapptest"));
 
 var app = builder.Build();
 
