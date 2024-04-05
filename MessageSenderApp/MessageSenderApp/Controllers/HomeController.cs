@@ -8,9 +8,12 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    private readonly QueueService _queueService;
+
+    public HomeController(ILogger<HomeController> logger, QueueService queueService)
     {
         _logger = logger;
+        _queueService = queueService;
     }
 
     public IActionResult Index()
@@ -18,8 +21,9 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public async Task<IActionResult> Privacy()
     {
+        await _queueService.SendMessageAsync("hello world");
         return View();
     }
 

@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "C#: MessageSenderApp [Default Configuration]",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/MessageSenderApp/MessageSenderApp/MessageSenderApp.csproj"
+        },
+        {
+            "name": "C#: MessageSenderApp",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/MessageSenderApp/MessageSenderApp/MessageSenderApp.csproj",
+            "launchConfigurationId": "TargetFramework=;https"
+        }
+    ]
+}

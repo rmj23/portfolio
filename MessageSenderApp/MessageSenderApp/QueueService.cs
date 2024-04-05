@@ -12,7 +12,7 @@ public class QueueService
     public QueueService(string connectionString, string queueName)
     {
         _queueClient = new QueueClient(connectionString, queueName);
-        _queueClient.CreateIfNotExists();
+        //_queueClient.CreateIfNotExists();
 
         _retryPolicy = Policy
             .Handle<Exception>()
