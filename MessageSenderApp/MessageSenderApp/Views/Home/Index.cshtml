@@ -1,8 +1,36 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Chat Interface";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Chat Interface</h2>
+
+<div id="chatWindow" style="border: 1px solid black; height: 300px; overflow-y: scroll; padding: 5px;">
+    <!-- Messages will be displayed here -->
 </div>
+
+<input type="text" id="messageInput" placeholder="Type a message..." />
+<button id="sendMessageButton">Send</button>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#sendMessageButton').click(function () {
+                var message = $('#messageInput').val();
+
+                $.ajax({
+                    url: '@Url.Action("SendMessage", "Home")',
+                    type: 'POST',
+                    data: { message: message },
+                    success: function (response) {
+                        $('#chatWindow').append('<div>' + message + ' (Sent) ID: ' + response.messageId + '</div>');
+                        $('#messageInput').val(''); // Clear input field
+                    },
+                    error: function (xhr, status, error) {
+                        $('#chatWindow').append('<div>Error sending message</div>');
+                    }
+                });
+            });
+        });
+    </script>
+}
+

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using MessageSenderApp.Models;
+using Azure.Storage.Queues.Models;
 
 namespace MessageSenderApp.Controllers;
 
@@ -21,10 +22,12 @@ public class HomeController : Controller
         return View();
     }
 
-    public async Task<IActionResult> Privacy()
+    [HttpPost]
+    public async Task<IActionResult> SendMessage(string message)
     {
-        await _queueService.SendMessageAsync("hello world");
-        return View();
+        SendReceipt receipt = await _queueService.SendMessageAsync(message);
+
+        return Json(receipt);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Polly;
 using System;
 using System.Threading.Tasks;
@@ -12,18 +13,16 @@ public class QueueService
     public QueueService(string connectionString, string queueName)
     {
         _queueClient = new QueueClient(connectionString, queueName);
-        //_queueClient.CreateIfNotExists();
-
         _retryPolicy = Policy
             .Handle<Exception>()
             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 
-    public async Task SendMessageAsync(string message)
+    public async Task<SendReceipt> SendMessageAsync(string message)
     {
-        await _retryPolicy.ExecuteAsync(async () => 
+        return await _retryPolicy.ExecuteAsync(async () => 
         {
-            await _queueClient.SendMessageAsync(message);
+            return await _queueClient.SendMessageAsync(message);
         });
     }
 }
