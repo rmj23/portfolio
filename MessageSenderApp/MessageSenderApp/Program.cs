@@ -6,15 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
-// var keyVaultUrl = builder.Configuration["KeyVaultUrl"] ?? string.Empty;
-// var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
-// {
-//     ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
-// });
-// builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), creds);
-
-// var queueServiceConnectionString = builder.Configuration["StorageConnectionString"] ?? string.Empty;
-// builder.Services.AddSingleton(new QueueService(queueServiceConnectionString, "webapptest"));
+builder.Services.AddSingleton<KeyVaultService>();
+builder.Services.AddSingleton<QueueService>();
 
 var app = builder.Build();
 

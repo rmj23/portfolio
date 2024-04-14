@@ -9,10 +9,16 @@ public class QueueService
 {
     private readonly QueueClient _queueClient;
     private readonly IAsyncPolicy _retryPolicy;
+    private readonly string _testQueueName = "webapptest";
 
-    public QueueService(string connectionString, string queueName)
+    public QueueService(IConfiguration configurationManager, KeyVaultService keyVaultService)
     {
-        _queueClient = new QueueClient(connectionString, queueName);
+        var queueServiceKeyName = configurationManager.GetValue<string>("QueueServiceKeyName");
+
+        var connectionString = keyVaultService.GetSecret(queueServiceKeyName);
+
+        _queueClient = new QueueClient(connectionString, _testQueueName);
+        
         _retryPolicy = Policy
             .Handle<Exception>()
             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
