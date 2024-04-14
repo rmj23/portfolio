@@ -11,10 +11,10 @@ public class HomeController : Controller
 
     private readonly QueueService _queueService;
 
-    public HomeController(ILogger<HomeController> logger, QueueService queueService)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _queueService = queueService;
+        //_queueService = queueService;
     }
 
     public IActionResult Index()
