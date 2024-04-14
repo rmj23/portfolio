@@ -11,16 +11,10 @@ public class KeyVaultService
     public KeyVaultService(IConfiguration configurationManager) 
     {
         _configurationManager = configurationManager;
-        
+
         var keyVaultUrl = _configurationManager.GetValue<string>("KeyVaultUrl");
         
-        
-        var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions 
-        {
-            ManagedIdentityClientId = "7494deba-68fe-48fe-a074-aef13a3446be"
-        });
-
-        _secretClient = new SecretClient(new Uri(keyVaultUrl), creds);
+        _secretClient = new SecretClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
 
     }
 
